@@ -193,6 +193,7 @@ bool App1::frame()
 	return true;
 }
 
+
 void App1::initPostProKernels()
 {
 	float boxBlurKernel[16] = {	1.0f, 1.0f, 1.0f, 0.0f,
