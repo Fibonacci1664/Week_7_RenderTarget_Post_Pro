@@ -60,16 +60,19 @@ private:
 
 	XMFLOAT4 playerPos;
 
-	XMFLOAT2* screenSize;
+	XMFLOAT2 screenSize;
 
-	XMFLOAT4 boxBlurKernel[4];
-	float boxBlurNeighbours;
+	XMFLOAT4X4 boxBlurKernel;
+	float boxBlurCoeff;
 
 	XMFLOAT4X4 gaussianBlurKernel;
-	float gaussianBlurNeighbours;
+	float gaussianBlurCoeff;
 
 	XMFLOAT4X4 edgeKernel;
-	float edgeNeighbours;
+	float edgeCoeff;
+
+	XMFLOAT4X4 sharpenKernel;
+	float sharpenCoeff;
 };
 
 #endif

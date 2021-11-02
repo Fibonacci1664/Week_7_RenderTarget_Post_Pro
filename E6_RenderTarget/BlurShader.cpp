@@ -99,9 +99,9 @@ void BlurShader::setShaderParameters(ID3D11DeviceContext* deviceContext,
 	const XMMATRIX& viewMatrix,
 	const XMMATRIX& projectionMatrix,
 	ID3D11ShaderResourceView* texture,
-	XMFLOAT2* screenSz,
-	XMFLOAT4* kernel,
-	float nhSize)
+	XMFLOAT2 screenSz,
+	XMFLOAT4X4 kernel,
+	float coeff)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -131,13 +131,14 @@ void BlurShader::setShaderParameters(ID3D11DeviceContext* deviceContext,
 	deviceContext->PSSetConstantBuffers(0, 1, &screenBuffer);
 
 	KernelBufferType* kernelPtr;
-	deviceContext->Map(screenBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	deviceContext->Map(kernelBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	kernelPtr = (KernelBufferType*)mappedResource.pData;
 	kernelPtr->kernel = kernel;
-	/*kernelPtr->kernel[1] = kernel[1];
-	kernelPtr->kernel[2] = kernel[2];
-	kernelPtr->kernel[3] = kernel[3];*/
-	kernelPtr->neighbourhoodSize = nhSize;
+	/*kernelPtr->row1 = row1;
+	kernelPtr->row2 = row2;
+	kernelPtr->row3 = row3;
+	kernelPtr->row4 = row4;*/
+	kernelPtr->coeff = coeff;
 	kernelPtr->nhPadding = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	deviceContext->Unmap(kernelBuffer, 0);
 	deviceContext->PSSetConstantBuffers(1, 1, &kernelBuffer);

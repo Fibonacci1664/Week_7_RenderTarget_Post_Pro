@@ -17,8 +17,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 {
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
-	screenSize->x = screenWidth;
-	screenSize->y = screenHeight;
+	screenSize = XMFLOAT2(screenWidth, screenHeight);
 	initPostProKernels();
 
 	/*BEcamera = new Camera();
@@ -197,36 +196,37 @@ bool App1::frame()
 
 void App1::initPostProKernels()
 {
-	/*float boxBlurKernelArr[16] = {	1.0f, 1.0f, 1.0f, 0.0f,
-								1.0f, 1.0f, 1.0f, 0.0f,
-								1.0f, 1.0f, 1.0f, 0.0f,
-								0.0f, 0.0f, 0.0f, 0.0f };*/
+	float boxBlurKernelArr[16] = {	1.0f, 1.0f, 1.0f, 0.0f,
+									1.0f, 1.0f, 1.0f, 0.0f,
+									1.0f, 1.0f, 1.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 0.0f };
 
-	XMFLOAT4 boxBlurRow1 = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
-	XMFLOAT4 boxBlurRow2 = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
-	XMFLOAT4 boxBlurRow3 = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
-	XMFLOAT4 boxBlurRow4 = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	boxBlurKernel[0] = boxBlurRow1;
-	boxBlurKernel[1] = boxBlurRow2;
-	boxBlurKernel[2] = boxBlurRow3;
-	boxBlurKernel[3] = boxBlurRow4;
-	boxBlurNeighbours = 9.0f;
+	boxBlurKernel = XMFLOAT4X4(boxBlurKernelArr);
+	boxBlurCoeff = 1.0f / 9.0f;
 
-	float gaussianBlurKernelArr[16] = { 1.0f, 1.0f, 1.0f, 0.0f,
-									 1.0f, 1.0f, 1.0f, 0.0f,
-									 1.0f, 1.0f, 1.0f, 0.0f,
-									 0.0f, 0.0f, 0.0f, 0.0f };
+	float gaussianBlurKernelArr[16] = { 1.0f, 2.0f, 1.0f, 0.0f,
+										2.0f, 4.0f, 2.0f, 0.0f,
+										1.0f, 2.0f, 1.0f, 0.0f,
+										0.0f, 0.0f, 0.0f, 0.0f };
 
 	gaussianBlurKernel = XMFLOAT4X4(gaussianBlurKernelArr);
-	gaussianBlurNeighbours = 1 / 16.0f;
+	gaussianBlurCoeff = 1.0f / 16.0f;
 
-	float edgeKernelArr[16] = { 1.0f, 1.0f, 1.0f, 0.0f,
-							 1.0f, 1.0f, 1.0f, 0.0f,
-							 1.0f, 1.0f, 1.0f, 0.0f,
-							 0.0f, 0.0f, 0.0f, 0.0f };
+	float edgeKernelArr[16] = { -1.0f, -1.0f, -1.0f, 0.0f,
+								-1.0f,	8.0f, -1.0f, 0.0f,
+								-1.0f, -1.0f, -1.0f, 0.0f,
+								 0.0f,  0.0f,  0.0f, 0.0f };
 
 	edgeKernel = XMFLOAT4X4(edgeKernelArr);
-	edgeNeighbours = 1.0f;
+	edgeCoeff = 1.0f;
+
+	float sharpenKernelArr[16] = { 0.0f, -1.0f,  0.0f, 0.0f,
+								  -1.0f,  5.0f, -1.0f, 0.0f,
+								   0.0f, -1.0f,  0.0f, 0.0f,
+								   0.0f,  0.0f,  0.0f, 0.0f };
+
+	sharpenKernel = XMFLOAT4X4(sharpenKernelArr);
+	sharpenCoeff = 1.0f;
 }
 
 void App1::movePlayer()
@@ -348,10 +348,11 @@ void App1::secondPass()
 
 	orthoMesh_1->sendData(renderer->getDeviceContext());
 
-	XMFLOAT4 test = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
-
 	// Use a custom blur shader here
-	blurShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture_1->getShaderResourceView(), screenSize, &test, boxBlurNeighbours);
+	//blurShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture_1->getShaderResourceView(), screenSize, boxBlurKernel, boxBlurCoeff);
+	//blurShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture_1->getShaderResourceView(), screenSize, gaussianBlurKernel, gaussianBlurCoeff);
+	//blurShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture_1->getShaderResourceView(), screenSize, edgeKernel, edgeCoeff);
+	blurShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture_1->getShaderResourceView(), screenSize, sharpenKernel, sharpenCoeff);
 	blurShader->render(renderer->getDeviceContext(), orthoMesh_1->getIndexCount());
 	renderer->setZBuffer(true);
 

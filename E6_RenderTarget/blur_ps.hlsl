@@ -13,8 +13,8 @@ cbuffer ScreenSize : register(b0)
 
 cbuffer Kernel : register(b1)
 {
-    float4 kernel;
-    float neighbourhoodSize;
+    float4x4 kernel;
+    float coeff;
     float3 nhPadding;
 };
 
@@ -35,6 +35,9 @@ float4 main(InputType input) : SV_TARGET
     float texelWidth = 1.0f / scrSize.x;
     float texelHeight = 1.0f / scrSize.y;
     
+    //float texelWidth = 1.0f / 1184;
+    //float texelHeight = 1.0f / 636;
+    
     float2 texPosNorth = input.tex + float2(0.0f, texelHeight);
     float2 texPosNorthEast = input.tex + float2(texelWidth, texelHeight);
     float2 texPosEast = input.tex + float2(texelWidth, 0.0f);
@@ -43,30 +46,20 @@ float4 main(InputType input) : SV_TARGET
     float2 texPosSouthWest = input.tex + float2(-texelWidth, -texelHeight);
     float2 texPosWest = input.tex + float2(-texelWidth, 0.0f);
     float2 texPosNorthWest = input.tex + float2(-texelWidth, texelHeight);
-       
-    // --------------------------------------------------------------------------
-    
-    // 3x3 matrix structure
-    
-    //  -- m00 -- m01 -- m02
-    //  -- m10 -- m11 -- m12
-    //  -- m20 -- m21 -- m22
     
     // --------------------------------------------------------------------------
     
-    colour += texCol * kernel.x;
-    colour += texture0.Sample(Sampler0, texPosNorth * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosNorthEast * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosEast * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosSouthEast * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosSouth * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosSouthWest * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosWest * kernel.x);
-    colour += texture0.Sample(Sampler0, texPosNorthWest * kernel.x);
-    
-    colour /= 9.0f;
+    colour += texCol * kernel[1].y;
+    colour += texture0.Sample(Sampler0, texPosNorth) * kernel[0].y;
+    colour += texture0.Sample(Sampler0, texPosNorthEast) * kernel[0].z;
+    colour += texture0.Sample(Sampler0, texPosEast) * kernel[1].z;
+    colour += texture0.Sample(Sampler0, texPosSouthEast) * kernel[2].z;
+    colour += texture0.Sample(Sampler0, texPosSouth) * kernel[2].y;
+    colour += texture0.Sample(Sampler0, texPosSouthWest) * kernel[2].x;
+    colour += texture0.Sample(Sampler0, texPosWest) * kernel[1].x;
+    colour += texture0.Sample(Sampler0, texPosNorthWest) * kernel[0].x;
+     
+    colour *= coeff;
     
     return colour;
-    //return texCol;
-
 }
