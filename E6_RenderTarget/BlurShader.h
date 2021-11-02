@@ -10,16 +10,15 @@ class BlurShader : public BaseShader
 private:
 	struct ScreenBufferType
 	{
-		float scrWidth;
-		float scrHeight;
+		XMFLOAT2* screenSize;
 		XMFLOAT2 padding;
 	};
 
 	struct KernelBufferType
 	{
-		XMMATRIX kernel;
-		float kernelCoefficient;
-		XMFLOAT3 coeffPadding;
+		XMFLOAT4* kernel;
+		float neighbourhoodSize;
+		XMFLOAT3 nhPadding;
 	};
 
 public:
@@ -31,10 +30,9 @@ public:
 		const XMMATRIX& view,
 		const XMMATRIX& projection,
 		ID3D11ShaderResourceView* texture,
-		float sWidth,
-		float sHeight,
-		XMMATRIX& kernel,
-		float kernelCoeff);
+		XMFLOAT2* screenSz,
+		XMFLOAT4* kernel,
+		float nhSize);
 
 private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);

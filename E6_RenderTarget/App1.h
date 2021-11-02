@@ -60,14 +60,16 @@ private:
 
 	XMFLOAT4 playerPos;
 
-	XMMATRIX boxBlurKernelMat;
-	float boxBlurKernelCoeff;
+	XMFLOAT2* screenSize;
 
-	XMMATRIX gaussianBlurKernelMat;
-	float gaussianBlurKernelCoeff;
+	XMFLOAT4 boxBlurKernel[4];
+	float boxBlurNeighbours;
 
-	XMMATRIX edgeKernelMat;
-	float edgeKernelCoeff;
+	XMFLOAT4X4 gaussianBlurKernel;
+	float gaussianBlurNeighbours;
+
+	XMFLOAT4X4 edgeKernel;
+	float edgeNeighbours;
 };
 
 #endif
